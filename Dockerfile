@@ -1,4 +1,4 @@
-FROM alpine:3.19.1@sha256:c5b1261d6d3e43071626931fc004f70149baeba2c8ec672bd4f27761f8e1ad6b
+FROM alpine:3.20.0@sha256:8768f0ca8ce33ec230c116364fbaebc1e18aaabbbda1ced56658f5eb0012202b
 LABEL org.opencontainers.image.source https://github.com/trexx/docker-vaultwarden-backup
 
 # renovate: datasource=repology depName=alpine_3_19/sqlite versioning=loose
