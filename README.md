@@ -6,7 +6,7 @@ A simple Alpine based docker image with sqlite3 to run online backups against th
 Investigate statically compiling sqlite3 to further reduce container image footprint. 
 
 ## Kubernetes Cronjob Example
-After the Cronjob, you can run another backup job to ship the PVC to a Restic repository.
+After the Cronjob, you can run another job to ship the PVC to a Restic repository.
 
 ```yaml
 apiVersion: batch/v1
