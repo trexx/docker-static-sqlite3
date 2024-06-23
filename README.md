@@ -1,9 +1,9 @@
 # docker-vaultwarden-backup
 
-A simple Alpine based docker image with sqlite3 to run online backups against the vaultwarden database as part of a Kubernetes cronjob.
+A simple Alpine based docker image with sqlite3 to run online backups against the vaultwarden database as part of a Kubernetes CronJob.
 
 ## Todo
-Investigate statically  compiling sqlite3 to further reduce container image footprint. 
+Investigate statically compiling sqlite3 to further reduce container image footprint. 
 
 ## Kubernetes Cronjob Example
 After the Cronjob, you can run another backup job to ship the PVC to a Restic repository.
