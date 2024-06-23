@@ -1,15 +1,40 @@
-# docker-nfs-server
+# docker-vaultwarden-backup
 
-A simple nfs-server Docker image based on Alpine.
-NFS 4.2 enabled. NFS v2 & v3 disabled.
+A simple Alpine based docker image with sqlite3 to run online backups against the vaultwarden database as part of a Kubernetes cronjob.
 
-## Usage
+## Todo
+Investigate statically  compiling sqlite3 to further reduce container image footprint. 
 
-Here I skip using `/etc/exports` and write an etab file to `/var/lib/nfs/etab`
+## Kubernetes Cronjob Example
+After the Cronjob, you can run another backup job to ship the PVC to a Restic repository.
 
-
-```
-{
-	"etab": "/data *(rw,sync,wdelay,hide,nocrossmnt,insecure,root_squash,no_all_squash,no_subtree_check,secure_locks,acl,no_pnfs,fsid=0,anonuid=65534,anongid=65534,sec=sys)"
-}
+```yaml
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: backup
+spec:
+  schedule: "0 0 * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: backup
+            image: ghcr.io/trexx/docker-vaultwarden-backup:3.20.1
+            command:
+              - /bin/sh
+              - -c
+              - sqlite3 "${DATA_DIR}/db.sqlite3" ".backup '${DATA_DIR}/db.sqlite3.bak'"
+            env:
+              - name: DATA_DIR
+                value: /data
+            volumeMounts:
+              - mountPath: /data
+                name: data
+          restartPolicy: OnFailure
+          volumes:
+            - name: data
+              persistentVolumeClaim:
+                claimName: data-vaultwarden-0
 ```
