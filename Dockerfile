@@ -1,4 +1,4 @@
-FROM alpine:latest as build
+FROM alpine:latest@sha256:b89d9c93e9ed3597455c90a0b88a8bbb5cb7188438f70953fede212a0c4394e0 as build
 
 RUN apk add --no-cache gcc unzip musl-dev
 
