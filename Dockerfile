@@ -1,7 +1,69 @@
-FROM alpine:3.20.1@sha256:b89d9c93e9ed3597455c90a0b88a8bbb5cb7188438f70953fede212a0c4394e0
+FROM alpine:latest as build
+
+RUN apk add --no-cache gcc unzip musl-dev
+
+ENV SQLITE_VERSION "3460000"
+
+ADD https://www.sqlite.org/2024/sqlite-amalgamation-${SQLITE_VERSION}.zip / 
+RUN unzip sqlite-amalgamation-${SQLITE_VERSION}.zip
+WORKDIR sqlite-amalgamation-${SQLITE_VERSION}
+
+RUN gcc -O2                                   \
+  -DSQLITE_DQS=0                              \
+  -DSQLITE_USE_ALLOCA                         \
+  -DSQLITE_THREADSAFE=0                       \
+  -DSQLITE_LIKE_DOESNT_MATCH_BLOBS            \
+  -DSQLITE_OMIT_AUTOINCREMENT                 \
+  -DSQLITE_OMIT_AUTOINIT                      \
+  -DSQLITE_OMIT_AUTOMATIC_INDEX               \
+  -DSQLITE_OMIT_AUTORESET                     \
+  -DSQLITE_OMIT_AUTOVACUUM                    \
+  -DSQLITE_OMIT_BETWEEN_OPTIMIZATION          \
+  -DSQLITE_OMIT_BLOB_LITERAL                  \
+  -DSQLITE_OMIT_CASE_SENSITIVE_LIKE_PRAGMA    \
+  -DSQLITE_OMIT_CAST                          \
+  -DSQLITE_OMIT_CHECK                         \
+  -DSQLITE_OMIT_COMPILEOPTION_DIAGS           \
+  -DSQLITE_OMIT_COMPOUND_SELECT               \
+  -DSQLITE_OMIT_DATETIME_FUNCS                \
+  -DSQLITE_OMIT_DECLTYPE                      \
+  -DSQLITE_OMIT_DEPRECATED                    \
+  -DSQLITE_OMIT_DESERIALIZE                   \
+  -DSQLITE_OMIT_EXPLAIN                       \
+  -DSQLITE_OMIT_FLAG_PRAGMAS                  \
+  -DSQLITE_OMIT_FOREIGN_KEY                   \
+  -DSQLITE_OMIT_GENERATED_COLUMNS             \
+  -DSQLITE_OMIT_GET_TABLE                     \
+  -DSQLITE_OMIT_HEX_INTEGER                   \
+  -DSQLITE_OMIT_INCRBLOB                      \
+  -DSQLITE_OMIT_INTEGRITY_CHECK               \
+  -DSQLITE_OMIT_INTROSPECTION_PRAGMAS         \
+  -DSQLITE_OMIT_JSON                          \
+  -DSQLITE_OMIT_LIKE_OPTIMIZATION             \
+  -DSQLITE_OMIT_LOAD_EXTENSION                \
+  -DSQLITE_OMIT_LOCALTIME                     \
+  -DSQLITE_OMIT_LOOKASIDE                     \
+  -DSQLITE_OMIT_MEMORYDB                      \
+  -DSQLITE_OMIT_OR_OPTIMIZATION               \
+  -DSQLITE_OMIT_PROGRESS_CALLBACK             \
+  -DSQLITE_OMIT_QUICKBALANCE                  \
+  -DSQLITE_OMIT_SCHEMA_PRAGMAS                \
+  -DSQLITE_OMIT_SCHEMA_VERSION_PRAGMAS        \
+  -DSQLITE_OMIT_SHARED_CACHE                  \
+  -DSQLITE_OMIT_SEH                           \
+  -DSQLITE_OMIT_TCL_VARIABLE                  \
+  -DSQLITE_OMIT_TEMPDB                        \
+  -DSQLITE_OMIT_TRACE                         \
+  -DSQLITE_OMIT_TRUNCATE_OPTIMIZATION         \
+  -DSQLITE_OMIT_UTF16                         \
+  -DSQLITE_OMIT_WAL                           \
+  -DSQLITE_OMIT_XFER_OPT                      \
+  -DSQLITE_UNTESTABLE                         \
+  shell.c sqlite3.c -static -lm -o sqlite3
+
+RUN strip --strip-all sqlite3
+
+FROM scratch
 LABEL org.opencontainers.image.source https://github.com/trexx/docker-vaultwarden-backup
 
-# renovate: datasource=repology depName=alpine_3_20/sqlite versioning=loose
-ENV SQLITE_VERSION "3.45.3-r1"
-
-RUN apk --update --no-cache add sqlite="${SQLITE_VERSION}"
+COPY --from=build /sqlite-amalgamation-3460000/sqlite3 /sqlite3 
