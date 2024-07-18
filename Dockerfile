@@ -1,12 +1,14 @@
-FROM alpine:latest as build
+FROM alpine:latest AS build
 
-RUN apk add --no-cache gcc unzip musl-dev
+ENV SQLITE_VERSION="3460000"
+ADD https://www.sqlite.org/2024/sqlite-amalgamation-${SQLITE_VERSION}.zip /tmp
 
-ENV SQLITE_VERSION "3460000"
+RUN apk add --no-cache gcc libarchive-tools musl-dev
 
-ADD https://www.sqlite.org/2024/sqlite-amalgamation-${SQLITE_VERSION}.zip / 
-RUN unzip sqlite-amalgamation-${SQLITE_VERSION}.zip
-WORKDIR sqlite-amalgamation-${SQLITE_VERSION}
+RUN mkdir /tmp/src && \
+  bsdtar xvf /tmp/sqlite-amalgamation-${SQLITE_VERSION}.zip --strip-components=1 -C /tmp/src
+
+WORKDIR /tmp/src
 
 RUN gcc -O2                                   \
   -DSQLITE_DQS=0                              \
@@ -64,6 +66,6 @@ RUN gcc -O2                                   \
 RUN strip --strip-all sqlite3
 
 FROM scratch
-LABEL org.opencontainers.image.source https://github.com/trexx/docker-vaultwarden-backup
+LABEL org.opencontainers.image.source=https://github.com/trexx/docker-vaultwarden-backup
 
-COPY --from=build /sqlite-amalgamation-3460000/sqlite3 /sqlite3 
+COPY --from=build /tmp/src/sqlite3 /sqlite3 
