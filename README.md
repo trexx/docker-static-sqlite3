@@ -1,12 +1,11 @@
-# docker-vaultwarden-backup
+# docker-static-sqlite3
 
-A simple Alpine based docker image with sqlite3 to run online backups against the vaultwarden database as part of a Kubernetes CronJob.
+A statically compiled sqlite3 in an empty container image (~1.1 MB)
 
-## Todo
-Investigate statically compiling sqlite3 to further reduce container image footprint. 
+## Applications
+I use this image as part of a Kubernetes Cronjob to run .backup against VaultWardens sqlite database. Volsync will then ship the PVC off to BackBlaze.
 
 ## Kubernetes Cronjob Example
-After the Cronjob, you can run another job to ship the PVC to a Restic repository.
 
 ```yaml
 apiVersion: batch/v1
@@ -21,14 +20,11 @@ spec:
         spec:
           containers:
           - name: backup
-            image: ghcr.io/trexx/docker-vaultwarden-backup:3.20.1
+            image: ghcr.io/trexx/docker-static-sqlite3:3.46.0
             command:
-              - /bin/sh
-              - -c
-              - sqlite3 "${DATA_DIR}/db.sqlite3" ".backup '${DATA_DIR}/db.sqlite3.bak'"
-            env:
-              - name: DATA_DIR
-                value: /data
+              - /sqlite3
+              - /data/db.sqlite3
+              - .backup /data/db.sqlite3.bak
             volumeMounts:
               - mountPath: /data
                 name: data
