@@ -58,7 +58,6 @@ RUN gcc -O2                                   \
   -DSQLITE_OMIT_TRACE                         \
   -DSQLITE_OMIT_TRUNCATE_OPTIMIZATION         \
   -DSQLITE_OMIT_UTF16                         \
-  -DSQLITE_OMIT_WAL                           \
   -DSQLITE_OMIT_XFER_OPT                      \
   -DSQLITE_UNTESTABLE                         \
   shell.c sqlite3.c -static -lm -o sqlite3
