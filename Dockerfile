@@ -1,4 +1,4 @@
-FROM alpine:latest@sha256:5cc1526ee5c99c2982793abe22861e6047cfb5c8609cbe2d6bbe11d836263354 AS build
+FROM alpine:latest@sha256:21dc6063fd678b478f57c0e13f47560d0ea4eeba26dfc947b2a4f81f686b9f45 AS build
 
 ENV SQLITE_VERSION="3460000"
 ADD https://www.sqlite.org/2024/sqlite-amalgamation-${SQLITE_VERSION}.zip /tmp
