@@ -1,7 +1,7 @@
 FROM alpine:latest@sha256:5b10f432ef3da1b8d4c7eb6c487f2f5a8f096bc91145e68878dd4a5019afde11 AS build
 
 ENV SQLITE_VERSION="3530000"
-ADD https://www.sqlite.org/2024/sqlite-amalgamation-${SQLITE_VERSION}.zip /tmp
+ADD https://www.sqlite.org/2026/sqlite-amalgamation-${SQLITE_VERSION}.zip /tmp
 
 RUN apk add --no-cache gcc libarchive-tools musl-dev
 
