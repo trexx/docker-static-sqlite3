@@ -1,0 +1,60 @@
+name: 'SQLite'
+
+on:
+  schedule:
+    - cron: '17 13 * * *'
+
+jobs:
+  update:
+    runs-on: 'ubuntu-24.04'
+    permissions:
+      contents: 'write'
+      pull-requests: 'write'
+
+    steps:
+      - name: 'Checkout'
+        uses: 'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1' # v7.0.1
+
+      # sqlite.org names the amalgamation after a zero padded release id (3.53.4 -> 3530400)
+      # and files it under the year it was published. Renovate can derive neither, so the
+      # download page is the source of truth for both.
+      - name: 'Resolve latest amalgamation'
+        id: 'sqlite'
+        run: |
+          curl -fsSL -o "${RUNNER_TEMP}/download.html" 'https://www.sqlite.org/download.html'
+
+          product="$(grep -m1 -E '^PRODUCT,[0-9.]+,[0-9]{4}/sqlite-amalgamation-[0-9]+\.zip,' "${RUNNER_TEMP}/download.html" || true)"
+          if [ -z "${product}" ]; then
+            echo '::error::no amalgamation entry found on https://www.sqlite.org/download.html'
+            exit 1
+          fi
+
+          version="$(echo "${product}" | cut -d, -f2)"
+          path="$(echo "${product}" | cut -d, -f3)"
+          year="${path%%/*}"
+          release="${path#*sqlite-amalgamation-}"
+          release="${release%.zip}"
+
+          sed -i \
+            -e "s|^ENV SQLITE_VERSION=.*|ENV SQLITE_VERSION=\"${release}\"|" \
+            -e "s|^ENV SQLITE_YEAR=.*|ENV SQLITE_YEAR=\"${year}\"|" \
+            Dockerfile
+
+          {
+            echo "version=${version}"
+            echo "year=${year}"
+            echo "release=${release}"
+            echo "releaselog=$(echo "${version}" | tr '.' '_')"
+          } >> "${GITHUB_OUTPUT}"
+
+      - name: 'Open pull request'
+        uses: 'peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1' # v8.1.1
+        with:
+          branch: 'update/sqlite'
+          delete-branch: true
+          commit-message: 'Update SQLite to ${{ steps.sqlite.outputs.version }}'
+          title: 'Update SQLite to ${{ steps.sqlite.outputs.version }}'
+          body: |
+            [Release notes](https://www.sqlite.org/releaselog/${{ steps.sqlite.outputs.releaselog }}.html)
+
+            Amalgamation: https://www.sqlite.org/${{ steps.sqlite.outputs.year }}/sqlite-amalgamation-${{ steps.sqlite.outputs.release }}.zip
