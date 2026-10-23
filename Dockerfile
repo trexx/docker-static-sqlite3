@@ -1,7 +1,7 @@
 FROM alpine:3.24.3@sha256:be2656061b536c1883c4034790e21d0a09c5aaaf51968b89368a3c0371ea2c9a AS build
 
 # Both values are maintained by .github/workflows/sqlite.yml
-ENV SQLITE_VERSION="3530400"
+ENV SQLITE_VERSION="3540100"
 ENV SQLITE_YEAR="2026"
 ADD https://www.sqlite.org/${SQLITE_YEAR}/sqlite-amalgamation-${SQLITE_VERSION}.zip /tmp
 
