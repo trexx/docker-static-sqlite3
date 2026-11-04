@@ -13,7 +13,7 @@ jobs:
 
     steps:
       - name: 'Checkout'
-        uses: 'trexx/actions/.github/actions/checkout@shared-steps'
+        uses: 'trexx/actions/.github/actions/checkout@main'
 
       # sqlite.org names the amalgamation after a zero padded release id (3.53.4 -> 3530400)
       # and files it under the year it was published. Renovate can derive neither, so the
@@ -48,7 +48,7 @@ jobs:
           } >> "${GITHUB_OUTPUT}"
 
       - name: 'Open pull request'
-        uses: 'trexx/actions/.github/actions/create-pull-request@shared-steps'
+        uses: 'trexx/actions/.github/actions/create-pull-request@main'
         with:
           branch: 'update/sqlite'
           delete-branch: true
