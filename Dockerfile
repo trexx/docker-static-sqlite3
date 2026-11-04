@@ -67,6 +67,5 @@ RUN gcc -O2                                   \
 RUN strip --strip-all sqlite3
 
 FROM scratch
-LABEL org.opencontainers.image.source="https://github.com/trexx/docker-static-sqlite3"
 
 COPY --from=build /tmp/src/sqlite3 /sqlite3 
